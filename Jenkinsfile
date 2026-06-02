@@ -23,7 +23,7 @@ pipeline {
         string(
             name: 'DEPLOY_ENVS',
             defaultValue: 'Sandbox',
-            description: 'Enter environment(s) comma separated. Example: Sandbox or Sandbox,QA,UAT'
+            description: 'Sandbox,dev,uat,prod'
         )
         booleanParam(
             name: 'PUBLISH_TO_EXCHANGE',

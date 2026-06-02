@@ -6,7 +6,7 @@ pipeline {
         jdk 'JDK-17'
     }
 
-    env {
+    environment {
 
         // Organization Details
         ANYPOINT_ORG_ID      = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
@@ -17,7 +17,7 @@ pipeline {
         CONNECTED_APP_SECRET = '8b7B8D66306E47a29f4e3007547774f4'
 
         // Application Details
-        APP_NAME             = 'api-hello-jenkins'
+        APP_NAME             = 'jenkins-project'
 
         // CloudHub 2.0 Settings
         TARGET               = 'Cloudhub-US-East-2'

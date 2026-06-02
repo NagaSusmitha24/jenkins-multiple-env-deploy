@@ -11,11 +11,11 @@ pipeline {
         CONNECTED_APP_SECRET = '8b7B8D66306E47a29f4e3007547774f4'
         EXCHANGE_GROUP_ID    = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
         APP_NAME             = 'jenkins-multiple-environs'
-        CH2_REGION           = 'us-east-2'
+        CH2_REGION           = 'us-east-1'
         CH2_REPLICAS         = '1'
         CH2_VCORES           = '0.1'
         RUNTIME_VERSION      = '4.9.0'
-        TARGET               = 'Cloudhub-US-East-2'
+        TARGET               = 'cloudhub-2.0'
         MAVEN_SETTINGS       = 'C:\\Users\\Admin\\.m2\\settings.xml'
 
         // ── Define ALL your environments here as a variable ───────────────

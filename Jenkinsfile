@@ -1,248 +1,253 @@
 pipeline {
 
-    agent any
+```
+agent any
 
-    tools {
-        jdk 'JDK-17'
+tools {
+    jdk 'JDK-17'
+}
+
+environment {
+
+    // Organization Details
+    ANYPOINT_ORG_ID      = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
+    EXCHANGE_GROUP_ID    = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
+
+    // Connected App
+    CONNECTED_APP_ID     = 'c09ce27b91784380bf8646a62ec65c9d'
+    CONNECTED_APP_SECRET = '8b7B8D66306E47a29f4e3007547774f4'
+
+    // Base Application Name
+    APP_NAME             = 'world-project-api'
+
+    // CloudHub 2.0
+    TARGET               = 'Cloudhub-US-East-2'
+    CH2_REGION           = 'us-east-1'
+    CH2_REPLICAS         = '1'
+    CH2_VCORES           = '0.1'
+    RUNTIME_VERSION      = '4.9.17'
+
+    // Maven Settings
+    MAVEN_SETTINGS       = 'C:\\Users\\Admin\\.m2\\settings.xml'
+
+    // Environment IDs
+    SANDBOX_ENV_ID       = '39886fb6-d89f-4a56-a400-15ce44a87bbc'
+    DEV_ENV_ID           = '2ce5a5ae-ce2a-41a0-96fc-68a5e22df760'
+    UAT_ENV_ID           = '864fd6b3-5b44-41c5-89e9-d76573a27639'
+    PROD_ENV_ID          = 'ac61ddf1-1c0f-4c0f-9dfe-f305f90dbb8a'
+}
+
+parameters {
+
+    string(
+        name: 'DEPLOY_ENVS',
+        defaultValue: 'Sandbox,dev,uat,prod',
+        description: 'Comma separated environments'
+    )
+
+    booleanParam(
+        name: 'PUBLISH_TO_EXCHANGE',
+        defaultValue: true,
+        description: 'Publish artifact to Exchange'
+    )
+
+    booleanParam(
+        name: 'DEPLOY_TO_CLOUDHUB',
+        defaultValue: true,
+        description: 'Deploy to CloudHub 2.0'
+    )
+}
+
+stages {
+
+    stage('Checkout') {
+        steps {
+            echo "Checking out source code..."
+            checkout scm
+        }
     }
 
-    environment {
+    stage('Build & Test') {
+        steps {
 
-        // Organization Details
-        ANYPOINT_ORG_ID      = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
-        EXCHANGE_GROUP_ID    = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
+            echo "Running Tests..."
 
-        // Connected App
-        CONNECTED_APP_ID     = 'c09ce27b91784380bf8646a62ec65c9d'
-        CONNECTED_APP_SECRET = '8b7B8D66306E47a29f4e3007547774f4'
+            bat """
+                mvn clean test ^
+                -s %MAVEN_SETTINGS%
+            """
+        }
 
-        // Application Details
-        APP_NAME             = 'world-project-api'
-
-        // CloudHub 2.0 Settings
-        TARGET               = 'Cloudhub-US-East-2'
-        CH2_REGION           = 'us-east-1'
-        CH2_REPLICAS         = '1'
-        CH2_VCORES           = '0.1'
-        RUNTIME_VERSION      = '4.9.17'
-
-        // Maven Settings
-        MAVEN_SETTINGS       = 'C:\\Users\\Admin\\.m2\\settings.xml'
-
-        // Environment IDs
-        SANDBOX_ENV_ID       = '39886fb6-d89f-4a56-a400-15ce44a87bbc'
-        DEV_ENV_ID           = '2ce5a5ae-ce2a-41a0-96fc-68a5e22df760'
-        UAT_ENV_ID           = '864fd6b3-5b44-41c5-89e9-d76573a27639'
-        PROD_ENV_ID          = 'ac61ddf1-1c0f-4c0f-9dfe-f305f90dbb8a'
+        post {
+            always {
+                junit allowEmptyResults: true,
+                      testResults: '**/target/surefire-reports/*.xml'
+            }
+        }
     }
 
-    parameters {
+    stage('Package') {
+        steps {
 
-        string(
-            name: 'DEPLOY_ENVS',
-            defaultValue: 'Sandbox,dev,uat,prod',
-            description: 'Comma separated environment names'
-        )
+            echo "Packaging Application..."
 
-        booleanParam(
-            name: 'PUBLISH_TO_EXCHANGE',
-            defaultValue: true,
-            description: 'Publish artifact to Exchange'
-        )
-
-        booleanParam(
-            name: 'DEPLOY_TO_CLOUDHUB',
-            defaultValue: true,
-            description: 'Deploy to CloudHub 2.0'
-        )
+            bat """
+                mvn clean package ^
+                -DskipTests ^
+                -s %MAVEN_SETTINGS%
+            """
+        }
     }
 
-    stages {
+    stage('Publish To Exchange') {
 
-        stage('Checkout') {
-
-            steps {
-
-                echo "Checking out source code..."
-
-                checkout scm
-            }
+        when {
+            expression { params.PUBLISH_TO_EXCHANGE }
         }
 
-        stage('Build & Test') {
+        steps {
 
-            steps {
+            echo "Publishing to Exchange..."
 
-                echo "Running tests..."
+            bat """
+                mvn deploy ^
+                -DskipTests ^
+                -s %MAVEN_SETTINGS% ^
+                -Danypoint.platform.client_id=%CONNECTED_APP_ID% ^
+                -Danypoint.platform.client_secret=%CONNECTED_APP_SECRET% ^
+                -DrepositoryId=anypoint-exchange-v3 ^
+                -Durl=https://maven.anypoint.mulesoft.com/api/v3/organizations/%EXCHANGE_GROUP_ID%/maven
+            """
+        }
+    }
 
-                bat """
-                    mvn clean test ^
-                    -s %MAVEN_SETTINGS%
-                """
-            }
+    stage('Deploy To CloudHub 2.0') {
 
-            post {
-
-                always {
-
-                    junit allowEmptyResults: true,
-                           testResults: '**/target/surefire-reports/*.xml'
-                }
-            }
+        when {
+            expression { params.DEPLOY_TO_CLOUDHUB }
         }
 
-        stage('Package') {
+        steps {
 
-            steps {
+            script {
 
-                echo "Packaging Mule Application..."
+                def envConfig = [
 
-                bat """
-                    mvn clean package ^
-                    -DskipTests ^
-                    -s %MAVEN_SETTINGS%
-                """
-            }
-        }
+                    "Sandbox": [
+                        envId  : env.SANDBOX_ENV_ID,
+                        appName: "world-project-api-sandbox"
+                    ],
 
-        stage('Publish To Exchange') {
+                    "dev": [
+                        envId  : env.DEV_ENV_ID,
+                        appName: "world-project-api-dev"
+                    ],
 
-            when {
-                expression { params.PUBLISH_TO_EXCHANGE }
-            }
+                    "uat": [
+                        envId  : env.UAT_ENV_ID,
+                        appName: "world-project-api-uat"
+                    ],
 
-            steps {
-
-                echo "Publishing artifact to Exchange..."
-
-                bat """
-                    mvn deploy ^
-                    -DskipTests ^
-                    -s %MAVEN_SETTINGS% ^
-                    -Danypoint.platform.client_id=%CONNECTED_APP_ID% ^
-                    -Danypoint.platform.client_secret=%CONNECTED_APP_SECRET% ^
-                    -DrepositoryId=anypoint-exchange-v3 ^
-                    -Durl=https://maven.anypoint.mulesoft.com/api/v3/organizations/%EXCHANGE_GROUP_ID%/maven
-                """
-            }
-        }
-
-        stage('Deploy To Multiple Environments') {
-
-            when {
-                expression { params.DEPLOY_TO_CLOUDHUB }
-            }
-
-            steps {
-
-                script {
-
-                    def envMap = [
-                        "Sandbox": env.SANDBOX_ENV_ID,
-                        "dev"    : env.DEV_ENV_ID,
-                        "uat"    : env.UAT_ENV_ID,
-                        "prod"   : env.PROD_ENV_ID
+                    "prod": [
+                        envId  : env.PROD_ENV_ID,
+                        appName: "world-project-api-prod"
                     ]
+                ]
 
-                    def environments = params.DEPLOY_ENVS
+                def environments = params.DEPLOY_ENVS
                         .split(',')
                         .collect { it.trim() }
 
-                    def successEnvs = []
-                    def failedEnvs  = []
+                def successEnvs = []
+                def failedEnvs = []
 
-                    echo "======================================="
-                    echo "Selected Environments:"
-                    echo "${environments}"
-                    echo "======================================="
+                echo "=================================="
+                echo "Selected Environments"
+                echo "${environments}"
+                echo "=================================="
 
-                    for (String envName : environments) {
+                for (String envName : environments) {
 
-                        if (!envMap.containsKey(envName)) {
+                    if (!envConfig.containsKey(envName)) {
 
-                            echo "Environment not configured: ${envName}"
-                            failedEnvs.add(envName)
-                            continue
-                        }
-
-                        def envId = envMap[envName]
-
-                        def appName = "${APP_NAME}-${envName.toLowerCase()}"
-
-                        echo "======================================="
-                        echo "Deploying Application"
-                        echo "Environment : ${envName}"
-                        echo "Environment ID : ${envId}"
-                        echo "Application : ${appName}"
-                        echo "======================================="
-
-                        def deployStatus = bat(
-                            returnStatus: true,
-                            script: """
-                                mvn deploy ^
-                                -DmuleDeploy ^
-                                -DskipTests ^
-                                -s %MAVEN_SETTINGS% ^
-                                -Danypoint.platform.client_id=%CONNECTED_APP_ID% ^
-                                -Danypoint.platform.client_secret=%CONNECTED_APP_SECRET% ^
-                                -Danypoint.environment=${envName} ^
-                                -Danypoint.environmentId=${envId} ^
-                                -Dcloudhub2.applicationName=${appName} ^
-                                -Dcloudhub2.target=%TARGET% ^
-                                -Dcloudhub2.region=%CH2_REGION% ^
-                                -Dcloudhub2.replicas=%CH2_REPLICAS% ^
-                                -Dcloudhub2.vCores=%CH2_VCORES% ^
-                                -Dcloudhub2.muleVersion=%RUNTIME_VERSION% ^
-                                -Danypoint.businessGroup=%ANYPOINT_ORG_ID%
-                            """
-                        )
-
-                        if (deployStatus == 0) {
-
-                            successEnvs.add(envName)
-
-                            echo "SUCCESS : ${envName}"
-
-                        } else {
-
-                            failedEnvs.add(envName)
-
-                            echo "FAILED : ${envName}"
-                        }
+                        echo "Invalid Environment: ${envName}"
+                        failedEnvs.add(envName)
+                        continue
                     }
 
-                    echo ""
-                    echo "======================================="
-                    echo "DEPLOYMENT SUMMARY"
-                    echo "======================================="
-                    echo "SUCCESS : ${successEnvs}"
-                    echo "FAILED  : ${failedEnvs}"
-                    echo "======================================="
+                    def envId   = envConfig[envName].envId
+                    def appName = envConfig[envName].appName
 
-                    if (failedEnvs.size() > 0) {
+                    echo "=================================="
+                    echo "Environment : ${envName}"
+                    echo "Environment ID : ${envId}"
+                    echo "Application : ${appName}"
+                    echo "=================================="
 
-                        error("Deployment failed for environments: ${failedEnvs}")
+                    def deployStatus = bat(
+                        returnStatus: true,
+                        script: """
+                            mvn deploy ^
+                            -DmuleDeploy ^
+                            -DskipTests ^
+                            -s %MAVEN_SETTINGS% ^
+                            -Danypoint.platform.client_id=%CONNECTED_APP_ID% ^
+                            -Danypoint.platform.client_secret=%CONNECTED_APP_SECRET% ^
+                            -Danypoint.platform.environment=${envName} ^
+                            -Dcloudhub2.applicationName=${appName} ^
+                            -Dcloudhub2.target=%TARGET% ^
+                            -Dcloudhub2.region=%CH2_REGION% ^
+                            -Dcloudhub2.replicas=%CH2_REPLICAS% ^
+                            -Dcloudhub2.vCores=%CH2_VCORES% ^
+                            -Dcloudhub2.muleVersion=%RUNTIME_VERSION% ^
+                            -Danypoint.businessGroup=%ANYPOINT_ORG_ID%
+                        """
+                    )
+
+                    if (deployStatus == 0) {
+
+                        successEnvs.add(envName)
+
+                        echo "SUCCESS : ${envName}"
+
+                    } else {
+
+                        failedEnvs.add(envName)
+
+                        echo "FAILED : ${envName}"
                     }
+                }
+
+                echo ""
+                echo "=================================="
+                echo "DEPLOYMENT SUMMARY"
+                echo "=================================="
+                echo "SUCCESS : ${successEnvs}"
+                echo "FAILED  : ${failedEnvs}"
+                echo "=================================="
+
+                if (failedEnvs.size() > 0) {
+                    error("Deployment failed for environments: ${failedEnvs}")
                 }
             }
         }
     }
+}
 
-    post {
+post {
 
-        success {
-
-            echo "Pipeline completed successfully."
-        }
-
-        failure {
-
-            echo "Pipeline failed."
-        }
-
-        always {
-
-            cleanWs()
-        }
+    success {
+        echo "Pipeline completed successfully."
     }
+
+    failure {
+        echo "Pipeline failed."
+    }
+
+    always {
+        cleanWs()
+    }
+}
+```
+
 }

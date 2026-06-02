@@ -17,21 +17,24 @@ pipeline {
         RUNTIME_VERSION      = '4.9.0'
         TARGET               = 'cloudhub-2.0'
         MAVEN_SETTINGS       = 'C:\\Users\\Admin\\.m2\\settings.xml'
+
+        // ── Define ALL your environments here as a variable ───────────────
+        // Change this one line to control which environments get deployed
+        // Single  : ALL_ENVS = 'dev'
+        // Multiple: ALL_ENVS = 'dev,uat,prod'
+        ALL_ENVS             = 'dev,Sandbox,uat,prod'
     }
 
     parameters {
-        // ─────────────────────────────────────────────────────────────────
-        // TYPE EXACTLY as your Anypoint Platform environment names
-        // Single  → Sandbox
-        // Multiple → Sandbox,Dev,QA,Prod
-        // ─────────────────────────────────────────────────────────────────
+        // ── Override ALL_ENVS at runtime if needed ─────────────────────────
+        // Leave blank → uses ALL_ENVS variable above automatically
+        // Type value  → overrides ALL_ENVS for this specific build only
         string(
             name: 'DEPLOY_ENVS',
-            defaultValue: 'dev',
-            description: '''Enter Anypoint environment name(s).
-Single:   dev
-Multiple: dev,uat,prod
-NOTE: Must exactly match names in Anypoint Platform > Access Management > Environments'''
+            defaultValue: '',
+            description: '''Optional: Override environments for this build only.
+Leave BLANK to use default ALL_ENVS = dev,uat,prod (defined in pipeline).
+Or type specific envs → Example: dev   or   dev,uat'''
         )
         booleanParam(
             name: 'PUBLISH_TO_EXCHANGE',
@@ -54,19 +57,28 @@ NOTE: Must exactly match names in Anypoint Platform > Access Management > Enviro
             }
         }
 
-        // ── Print exactly which environments will be deployed ──────────────
         stage('Show Deploy Plan') {
             steps {
                 script {
-                    if (!params.DEPLOY_ENVS?.trim()) {
-                        error "DEPLOY_ENVS is empty! Please enter at least one environment."
-                    }
-                    def envList = params.DEPLOY_ENVS.split(',').collect { it.trim() }
+                    // ── If DEPLOY_ENVS param is blank → use ALL_ENVS variable
+                    // ── If DEPLOY_ENVS param has value → use that instead
+                    def targetEnvs = params.DEPLOY_ENVS?.trim()
+                                        ? params.DEPLOY_ENVS.trim()
+                                        : env.ALL_ENVS
+
+                    // Store resolved value for use in later stages
+                    env.RESOLVED_ENVS = targetEnvs
+
+                    def envList = targetEnvs.split(',').collect { it.trim() }
+
                     echo "=========================================="
                     echo "DEPLOY PLAN"
+                    echo "Source : ${params.DEPLOY_ENVS?.trim() ? 'Parameter (manual override)' : 'ALL_ENVS variable (default)'}"
+                    echo "Environments: ${targetEnvs}"
                     echo "=========================================="
-                    envList.eachWithIndex { env, i ->
-                        echo "  ${i + 1}. ${env}  →  ${APP_NAME}-${env.toLowerCase()}"
+                    envList.eachWithIndex { envItem, i ->
+                        echo "  ${i + 1}. Environment : ${envItem}"
+                        echo "     App Name   : ${APP_NAME}-${envItem.toLowerCase()}"
                     }
                     echo "=========================================="
                 }
@@ -137,26 +149,27 @@ NOTE: Must exactly match names in Anypoint Platform > Access Management > Enviro
             }
         }
 
-        // ── Deploy to each environment one by one ──────────────────────────
         stage('Deploy to CloudHub 2.0') {
             when {
                 expression { return params.DEPLOY_TO_CLOUDHUB }
             }
             steps {
                 script {
-                    def selectedEnvs = params.DEPLOY_ENVS.split(',').collect { it.trim() }
+                    // Use RESOLVED_ENVS set in Show Deploy Plan stage
+                    def selectedEnvs = env.RESOLVED_ENVS.split(',').collect { it.trim() }
                     def successEnvs  = []
                     def failedEnvs   = []
 
-                    echo ">>> Starting deployment to ${selectedEnvs.size()} environment(s)..."
+                    echo ">>> Deploying to ${selectedEnvs.size()} environment(s): ${selectedEnvs}"
 
                     for (def envTrimmed in selectedEnvs) {
-                        def appSuffix = envTrimmed.toLowerCase()
+                        def appSuffix   = envTrimmed.toLowerCase()
+                        def fullAppName = "${APP_NAME}-${appSuffix}"
 
                         echo "=========================================="
-                        echo ">>> [${selectedEnvs.indexOf(envTrimmed)+1}/${selectedEnvs.size()}] Deploying to: ${envTrimmed}"
-                        echo ">>> App Name : ${APP_NAME}-${appSuffix}"
-                        echo ">>> Env Name : ${envTrimmed}"
+                        echo ">>> [${selectedEnvs.indexOf(envTrimmed)+1}/${selectedEnvs.size()}]"
+                        echo ">>> Environment : ${envTrimmed}"
+                        echo ">>> App Name    : ${fullAppName}"
                         echo "=========================================="
 
                         def exitCode = bat(
@@ -166,14 +179,14 @@ NOTE: Must exactly match names in Anypoint Platform > Access Management > Enviro
                                 -DmuleDeploy ^
                                 -Danypoint.platform.client_id=%CONNECTED_APP_ID% ^
                                 -Danypoint.platform.client_secret=%CONNECTED_APP_SECRET% ^
-                                -Dcloudhub2.applicationName=%APP_NAME%-${appSuffix} ^
+                                -Danypoint.environment=${envTrimmed} ^
+                                -Dcloudhub2.applicationName=${fullAppName} ^
                                 -Dcloudhub2.target=%TARGET% ^
                                 -Dcloudhub2.region=%CH2_REGION% ^
                                 -Dcloudhub2.replicas=%CH2_REPLICAS% ^
                                 -Dcloudhub2.vCores=%CH2_VCORES% ^
                                 -Dcloudhub2.muleVersion=%RUNTIME_VERSION% ^
-                                -Danypoint.businessGroup=%ANYPOINT_ORG_ID% ^
-                                -Danypoint.environment=${envTrimmed}
+                                -Danypoint.businessGroup=%ANYPOINT_ORG_ID%
                             """,
                             returnStatus: true
                         )
@@ -187,7 +200,6 @@ NOTE: Must exactly match names in Anypoint Platform > Access Management > Enviro
                         }
                     }
 
-                    // ── Final Summary ──────────────────────────────────────
                     echo "=========================================="
                     echo "DEPLOYMENT SUMMARY"
                     echo "=========================================="
@@ -196,7 +208,7 @@ NOTE: Must exactly match names in Anypoint Platform > Access Management > Enviro
                     echo "=========================================="
 
                     if (failedEnvs.size() > 0) {
-                        error "Deployment failed for: ${failedEnvs}"
+                        error "Deployment failed for environments: ${failedEnvs}"
                     }
                 }
             }
@@ -205,7 +217,7 @@ NOTE: Must exactly match names in Anypoint Platform > Access Management > Enviro
 
     post {
         success {
-            echo "ALL DEPLOYMENTS SUCCESSFUL - Environments: ${params.DEPLOY_ENVS}"
+            echo "ALL DEPLOYMENTS SUCCESSFUL - Environments: ${env.RESOLVED_ENVS}"
         }
         failure {
             echo "PIPELINE FAILED - Check logs above for details"

@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
-    <artifactId>jenkins-multiple-env</artifactId>
-    <version>1.0.4</version>
+    <artifactId>jenkins-multiple-envs</artifactId>
+    <version>1.0.0</version>
     <packaging>mule-application</packaging>
 
-    <name>jenkins-multiple-env</name>
+    <name>jenkins-multiple-envs</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,7 +37,7 @@
 
             <target>Cloudhub-US-East-2</target>
 
-            <applicationName>jenkins-multiple-env</applicationName>
+            <applicationName>jenkins-multiple-envs</applicationName>
 
             <replicas>1</replicas>
 

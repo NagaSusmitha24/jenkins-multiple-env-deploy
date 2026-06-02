@@ -6,10 +6,10 @@
 
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
     <artifactId>world-project-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>mule-application</packaging>
 
-    <name>world-project-api</name>
+    <applicationName>${cloudhub2.applicationName}</applicationName>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,33 +26,35 @@
                 <version>${mule.maven.plugin.version}</version>
                 <extensions>true</extensions>
             
-                 <configuration>
-        <cloudhub2Deployment>
+       <configuration>
+    <cloudhub2Deployment>
 
-            <uri>https://anypoint.mulesoft.com</uri>
+        <uri>https://anypoint.mulesoft.com</uri>
 
-            <provider>MC</provider>
+        <provider>MC</provider>
 
-            <environment>${anypoint.platform.environment}</environment>
+        <environment>${anypoint.platform.environment}</environment>
 
-            <target>Cloudhub-US-East-2</target>
+        <target>${cloudhub2.target}</target>
 
-            <applicationName>world-project-api</applicationName>
+        <applicationName>${cloudhub2.applicationName}</applicationName>
 
-            <replicas>1</replicas>
+        <replicas>${cloudhub2.replicas}</replicas>
 
-            <vCores>0.1</vCores>
+        <vCores>${cloudhub2.vCores}</vCores>
 
-            <businessGroupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</businessGroupId>
+        <businessGroupId>${anypoint.businessGroup}</businessGroupId>
 
-            <connectedAppClientId>c09ce27b91784380bf8646a62ec65c9d</connectedAppClientId>
+        <connectedAppClientId>${anypoint.platform.client_id}</connectedAppClientId>
 
-            <connectedAppClientSecret>8b7B8D66306E47a29f4e3007547774f4</connectedAppClientSecret>
+        <connectedAppClientSecret>${anypoint.platform.client_secret}</connectedAppClientSecret>
 
-            <connectedAppGrantType>client_credentials</connectedAppGrantType>
+        <connectedAppGrantType>client_credentials</connectedAppGrantType>
 
-        </cloudhub2Deployment>
-    </configuration>
+        <muleVersion>${cloudhub2.muleVersion}</muleVersion>
+
+    </cloudhub2Deployment>
+</configuration>
             </plugin>
         </plugins>
     </build>

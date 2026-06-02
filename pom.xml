@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
-    <artifactId>api-hello-jenkins</artifactId>
-    <version>1.0.1</version>
+    <artifactId>jenkins-project</artifactId>
+    <version>1.0.0</version>
     <packaging>mule-application</packaging>
 
-    <name>api-hello-v2-jenkins</name>
+    <name>jenkins-project</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,7 +37,7 @@
 
             <target>Cloudhub-US-East-2</target>
 
-            <applicationName>api-hello-jenkins</applicationName>
+            <applicationName>jenkins-project</applicationName>
 
             <replicas>1</replicas>
 

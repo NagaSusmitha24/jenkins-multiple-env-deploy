@@ -17,7 +17,7 @@ pipeline {
         CONNECTED_APP_SECRET = '8b7B8D66306E47a29f4e3007547774f4'
 
         // Application Details
-        APP_NAME             = 'jenkins-project'
+        APP_NAME             = 'jenkins-project-api'
 
         // CloudHub 2.0 Settings
         TARGET               = 'Cloudhub-US-East-2'

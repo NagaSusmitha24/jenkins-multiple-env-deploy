@@ -6,7 +6,7 @@
 
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
     <artifactId>jenkins-multiple-env</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.0</version>
     <packaging>mule-application</packaging>
 
     <name>jenkins-multiple-env</name>

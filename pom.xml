@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
-    <artifactId>world-project-api</artifactId>
+    <artifactId>world-project-api-jen</artifactId>
     <version>1.0.1</version>
     <packaging>mule-application</packaging>
 
-    <name>world-project-api</name>
+    <name>world-project-api-jen</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

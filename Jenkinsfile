@@ -15,7 +15,7 @@ pipeline {
         CH2_REPLICAS         = '1'
         CH2_VCORES           = '0.1'
         RUNTIME_VERSION      = '4.9.0'
-        TARGET               = 'cloudhub-2.0'
+        TARGET               = 'Cloudhub-US-East-2'
         MAVEN_SETTINGS       = 'C:\\Users\\Admin\\.m2\\settings.xml'
 
         // ── Define ALL your environments here as a variable ───────────────

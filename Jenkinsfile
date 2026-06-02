@@ -10,7 +10,7 @@ pipeline {
         CONNECTED_APP_ID     = 'c09ce27b91784380bf8646a62ec65c9d'
         CONNECTED_APP_SECRET = '8b7B8D66306E47a29f4e3007547774f4'
         EXCHANGE_GROUP_ID    = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
-        APP_NAME             = 'jenkins-app'
+        APP_NAME             = 'jenkins-multiple-envs'
         CH2_REGION           = 'us-east-1'
         CH2_REPLICAS         = '1'
         CH2_VCORES           = '0.1'

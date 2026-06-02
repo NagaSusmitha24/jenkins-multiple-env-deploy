@@ -27,10 +27,10 @@ pipeline {
         // ─────────────────────────────────────────────────────────────────
         string(
             name: 'DEPLOY_ENVS',
-            defaultValue: 'Sandbox',
+            defaultValue: 'dev',
             description: '''Enter Anypoint environment name(s).
-Single:   Sandbox
-Multiple: Sandbox,dev,uat,prod
+Single:   dev
+Multiple: dev,uat,prod
 NOTE: Must exactly match names in Anypoint Platform > Access Management > Environments'''
         )
         booleanParam(

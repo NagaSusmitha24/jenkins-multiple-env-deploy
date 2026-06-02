@@ -20,15 +20,23 @@ pipeline {
     }
 
     parameters {
+        // ─────────────────────────────────────────────────────────────────
+        // TYPE EXACTLY as your Anypoint Platform environment names
+        // Single  → Sandbox
+        // Multiple → Sandbox,Dev,QA,Prod
+        // ─────────────────────────────────────────────────────────────────
         string(
             name: 'DEPLOY_ENVS',
             defaultValue: 'Sandbox',
-            description: 'Sandbox,dev,uat,prod'
+            description: '''Enter Anypoint environment name(s).
+Single:   Sandbox
+Multiple: Sandbox,dev,uat,prod
+NOTE: Must exactly match names in Anypoint Platform > Access Management > Environments'''
         )
         booleanParam(
             name: 'PUBLISH_TO_EXCHANGE',
             defaultValue: true,
-            description: 'Publish artifact to Anypoint Exchange first?'
+            description: 'Publish artifact to Anypoint Exchange?'
         )
         booleanParam(
             name: 'DEPLOY_TO_CLOUDHUB',
@@ -46,13 +54,21 @@ pipeline {
             }
         }
 
-        stage('Validate Environments') {
+        // ── Print exactly which environments will be deployed ──────────────
+        stage('Show Deploy Plan') {
             steps {
                 script {
                     if (!params.DEPLOY_ENVS?.trim()) {
-                        error "DEPLOY_ENVS is empty! Provide at least one environment."
+                        error "DEPLOY_ENVS is empty! Please enter at least one environment."
                     }
-                    echo ">>> Environments: ${params.DEPLOY_ENVS}"
+                    def envList = params.DEPLOY_ENVS.split(',').collect { it.trim() }
+                    echo "=========================================="
+                    echo "DEPLOY PLAN"
+                    echo "=========================================="
+                    envList.eachWithIndex { env, i ->
+                        echo "  ${i + 1}. ${env}  →  ${APP_NAME}-${env.toLowerCase()}"
+                    }
+                    echo "=========================================="
                 }
             }
         }
@@ -61,20 +77,14 @@ pipeline {
             steps {
                 script {
                     echo ">>> Building and running MUnit tests..."
-
-                    // returnStatus: true → captures exit code instead of throwing exception
                     def exitCode = bat(
                         script: "mvn clean test -s %MAVEN_SETTINGS%",
-                        returnStatus: true   // ← this is how you use $? equivalent in Jenkins
+                        returnStatus: true
                     )
-
-                    echo ">>> Build exit code: ${exitCode}"  // same as echo $? in bash
-
                     if (exitCode != 0) {
                         error "Build & Test FAILED! Exit code: ${exitCode}"
-                    } else {
-                        echo ">>> Build & Test PASSED!"
                     }
+                    echo ">>> Build & Test PASSED!"
                 }
             }
             post {
@@ -89,17 +99,14 @@ pipeline {
             steps {
                 script {
                     echo ">>> Packaging MuleSoft application..."
-
                     def exitCode = bat(
                         script: "mvn package -DskipTests -s %MAVEN_SETTINGS%",
                         returnStatus: true
                     )
-
-                    echo ">>> Package exit code: ${exitCode}"
-
                     if (exitCode != 0) {
                         error "Packaging FAILED! Exit code: ${exitCode}"
                     }
+                    echo ">>> Packaging SUCCESSFUL!"
                 }
             }
         }
@@ -111,7 +118,6 @@ pipeline {
             steps {
                 script {
                     echo ">>> Publishing to Anypoint Exchange..."
-
                     def exitCode = bat(
                         script: """
                             mvn deploy -DskipTests ^
@@ -123,18 +129,15 @@ pipeline {
                         """,
                         returnStatus: true
                     )
-
-                    echo ">>> Exchange publish exit code: ${exitCode}"
-
                     if (exitCode != 0) {
-                        error "Exchange publish FAILED! Exit code: ${exitCode}"
+                        error "Exchange Publish FAILED! Exit code: ${exitCode}"
                     }
-
-                    echo ">>> Exchange publish SUCCESSFUL!"
+                    echo ">>> Exchange Publish SUCCESSFUL!"
                 }
             }
         }
 
+        // ── Deploy to each environment one by one ──────────────────────────
         stage('Deploy to CloudHub 2.0') {
             when {
                 expression { return params.DEPLOY_TO_CLOUDHUB }
@@ -142,19 +145,20 @@ pipeline {
             steps {
                 script {
                     def selectedEnvs = params.DEPLOY_ENVS.split(',').collect { it.trim() }
-                    def failedEnvs   = []   // track which envs failed
-                    def successEnvs  = []   // track which envs succeeded
+                    def successEnvs  = []
+                    def failedEnvs   = []
 
-                    echo ">>> Total environments to deploy: ${selectedEnvs.size()}"
+                    echo ">>> Starting deployment to ${selectedEnvs.size()} environment(s)..."
 
                     for (def envTrimmed in selectedEnvs) {
                         def appSuffix = envTrimmed.toLowerCase()
 
                         echo "=========================================="
-                        echo ">>> Deploying to: ${envTrimmed}"
+                        echo ">>> [${selectedEnvs.indexOf(envTrimmed)+1}/${selectedEnvs.size()}] Deploying to: ${envTrimmed}"
+                        echo ">>> App Name : ${APP_NAME}-${appSuffix}"
+                        echo ">>> Env Name : ${envTrimmed}"
                         echo "=========================================="
 
-                        // returnStatus captures the exit code ($? equivalent)
                         def exitCode = bat(
                             script: """
                                 mvn deploy -DskipTests ^
@@ -171,32 +175,28 @@ pipeline {
                                 -Danypoint.businessGroup=%ANYPOINT_ORG_ID% ^
                                 -Danypoint.environment=${envTrimmed}
                             """,
-                            returnStatus: true   // ← $? equivalent — captures 0 (success) or 1 (fail)
+                            returnStatus: true
                         )
 
-                        echo ">>> ${envTrimmed} deploy exit code: ${exitCode}"
-
-                        // Check exit code and track result
                         if (exitCode == 0) {
                             successEnvs.add(envTrimmed)
                             echo ">>> SUCCESS: ${envTrimmed}"
                         } else {
                             failedEnvs.add(envTrimmed)
-                            echo ">>> FAILED: ${envTrimmed} (exit code: ${exitCode})"
-                            // Continue to next env instead of stopping entire pipeline
+                            echo ">>> FAILED : ${envTrimmed} (exit code: ${exitCode})"
                         }
                     }
 
-                    // Final summary
+                    // ── Final Summary ──────────────────────────────────────
                     echo "=========================================="
-                    echo ">>> DEPLOYMENT SUMMARY"
-                    echo ">>> SUCCESS: ${successEnvs}"
-                    echo ">>> FAILED : ${failedEnvs}"
+                    echo "DEPLOYMENT SUMMARY"
+                    echo "=========================================="
+                    echo "SUCCESS (${successEnvs.size()}): ${successEnvs}"
+                    echo "FAILED  (${failedEnvs.size()}): ${failedEnvs}"
                     echo "=========================================="
 
-                    // Fail pipeline if any environment failed
                     if (failedEnvs.size() > 0) {
-                        error "Deployment failed for environments: ${failedEnvs}"
+                        error "Deployment failed for: ${failedEnvs}"
                     }
                 }
             }
@@ -205,10 +205,10 @@ pipeline {
 
     post {
         success {
-            echo "SUCCESS - ${APP_NAME} deployed to: ${params.DEPLOY_ENVS}"
+            echo "ALL DEPLOYMENTS SUCCESSFUL - Environments: ${params.DEPLOY_ENVS}"
         }
         failure {
-            echo "FAILED - Check console output above for errors"
+            echo "PIPELINE FAILED - Check logs above for details"
         }
         always {
             cleanWs()

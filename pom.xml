@@ -3,84 +3,69 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
-    <artifactId>jenkins-multiple-environs-v3</artifactId>
-    <version>1.0.4</version>
+    <artifactId>api-hello-v1</artifactId>
+    <version>1.0.0</version>
     <packaging>mule-application</packaging>
-    <name>jenkins-multiple-environs-v3</name>
+
+    <name>api-hello-v1</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <app.runtime>4.9.17</app.runtime>
         <mule.maven.plugin.version>4.7.0</mule.maven.plugin.version>
-
-        <!-- ── These are overridden by Jenkins -D flags ───────────────────
-             Jenkins passes:
-               -Danypoint.environment=dev
-               -Dcloudhub2.applicationName=jenkins-multiple-environs-dev
-               -Danypoint.platform.client_id=xxx
-               -Danypoint.platform.client_secret=xxx
-             If Jenkins does NOT pass them, these defaults are used instead
-        ──────────────────────────────────────────────────────────────── -->
-        <anypoint.environment>Sandbox</anypoint.environment>
-        <cloudhub2.applicationName>jenkins-multiple-environs</cloudhub2.applicationName>
-        <cloudhub2.target>Cloudhub-US-East-2</cloudhub2.target>
-        <cloudhub2.replicas>1</cloudhub2.replicas>
-        <cloudhub2.vCores>0.1</cloudhub2.vCores>
-        <anypoint.platform.client_id>c09ce27b91784380bf8646a62ec65c9d</anypoint.platform.client_id>
-        <anypoint.platform.client_secret>8b7B8D66306E47a29f4e3007547774f4</anypoint.platform.client_secret>
     </properties>
 
     <build>
         <plugins>
-            <plugin>
+		 <plugin>
                 <groupId>org.mule.tools.maven</groupId>
                 <artifactId>mule-maven-plugin</artifactId>
                 <version>${mule.maven.plugin.version}</version>
                 <extensions>true</extensions>
-                <configuration>
-                    <cloudhub2Deployment>
-                        <uri>https://anypoint.mulesoft.com</uri>
-                        <provider>MC</provider>
+            
+                 <configuration>
+        <cloudhub2Deployment>
 
-                        <!-- ✅ Reads from -Danypoint.environment passed by Jenkins -->
-                        <environment>${anypoint.environment}</environment>
+            <uri>https://anypoint.mulesoft.com</uri>
 
-                        <!-- ✅ Reads from -Dcloudhub2.target passed by Jenkins -->
-                        <target>${cloudhub2.target}</target>
+            <provider>MC</provider>
 
-                        <!-- ✅ Reads from -Dcloudhub2.applicationName passed by Jenkins -->
-                        <applicationName>${cloudhub2.applicationName}</applicationName>
+            <environment>dev</environment>
 
-                        <!-- ✅ Reads from -Dcloudhub2.replicas passed by Jenkins -->
-                        <replicas>${cloudhub2.replicas}</replicas>
+            <target>Cloudhub-US-East-2</target>
 
-                        <!-- ✅ Reads from -Dcloudhub2.vCores passed by Jenkins -->
-                        <vCores>${cloudhub2.vCores}</vCores>
+            <applicationName>api-hello-v1</applicationName>
 
-                        <businessGroupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</businessGroupId>
+            <replicas>1</replicas>
 
-                        <!-- ✅ Reads from -Danypoint.platform.client_id passed by Jenkins -->
-                        <connectedAppClientId>${anypoint.platform.client_id}</connectedAppClientId>
+            <vCores>0.1</vCores>
 
-                        <!-- ✅ Reads from -Danypoint.platform.client_secret passed by Jenkins -->
-                        <connectedAppClientSecret>${anypoint.platform.client_secret}</connectedAppClientSecret>
+            <businessGroupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</businessGroupId>
 
-                        <connectedAppGrantType>client_credentials</connectedAppGrantType>
-                    </cloudhub2Deployment>
-                </configuration>
+            <connectedAppClientId>c09ce27b91784380bf8646a62ec65c9d</connectedAppClientId>
+
+            <connectedAppClientSecret>8b7B8D66306E47a29f4e3007547774f4</connectedAppClientSecret>
+
+            <connectedAppGrantType>client_credentials</connectedAppGrantType>
+
+        </cloudhub2Deployment>
+    </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>anypoint-exchange-v3</id>
-            <name>Exchange</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v3/organizations/6c5ad96b-67a8-4bc6-8bb1-12443d5764e1/maven</url>
-        </repository>
-    </distributionManagement>
+   <distributionManagement>
+    <repository>
+        <id>anypoint-exchange-v3</id>
+        <name>Exchange</name>
+        <url>
+            https://maven.anypoint.mulesoft.com/api/v3/organizations/6c5ad96b-67a8-4bc6-8bb1-12443d5764e1/maven
+        </url>
+    </repository>
+</distributionManagement>
 
     <repositories>
         <repository>
@@ -100,6 +85,7 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <!-- ✅ Dependencies must be inside <dependencies> -->
     <dependencies>
         <dependency>
             <groupId>org.mule.connectors</groupId>
@@ -114,5 +100,4 @@
             <classifier>mule-plugin</classifier>
         </dependency>
     </dependencies>
-
 </project>

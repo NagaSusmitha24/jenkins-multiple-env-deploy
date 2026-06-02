@@ -1,103 +1,99 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
-    <artifactId>jenkins-multiple-environs</artifactId>
-    <version>1.0.0</version>
-    <packaging>mule-application</packaging>
-
-    <name>jenkins-multiple-environs</name>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <app.runtime>4.9.17</app.runtime>
-        <mule.maven.plugin.version>4.7.0</mule.maven.plugin.version>
-    </properties>
-
-    <build>
-        <plugins>
-		 <plugin>
-                <groupId>org.mule.tools.maven</groupId>
-                <artifactId>mule-maven-plugin</artifactId>
-                <version>${mule.maven.plugin.version}</version>
-                <extensions>true</extensions>
-            
-                 <configuration>
-        <cloudhub2Deployment>
-
-            <uri>https://anypoint.mulesoft.com</uri>
-
-            <provider>MC</provider>
-
-            <environment>Sandbox</environment>
-
-            <target>Cloudhub-US-East-2</target>
-
-            <applicationName>jenkins-multiple-environs</applicationName>
-
-            <replicas>1</replicas>
-
-            <vCores>0.1</vCores>
-
-            <businessGroupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</businessGroupId>
-
-            <connectedAppClientId>c09ce27b91784380bf8646a62ec65c9d</connectedAppClientId>
-
-            <connectedAppClientSecret>8b7B8D66306E47a29f4e3007547774f4</connectedAppClientSecret>
-
-            <connectedAppGrantType>client_credentials</connectedAppGrantType>
-
-        </cloudhub2Deployment>
-    </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-   <distributionManagement>
-    <repository>
-        <id>anypoint-exchange-v3</id>
-        <name>Exchange</name>
-        <url>
-            https://maven.anypoint.mulesoft.com/api/v3/organizations/6c5ad96b-67a8-4bc6-8bb1-12443d5764e1/maven
-        </url>
-    </repository>
+This XML file does not appear to have any style information associated with it. The document tree is shown below.
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+<groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
+<artifactId>jenkins-multiple-environs</artifactId>
+<version>1.0.0</version>
+<packaging>mule-application</packaging>
+<name>jenkins-multiple-environs</name>
+<properties>
+<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+<app.runtime>4.9.17</app.runtime>
+<mule.maven.plugin.version>4.7.0</mule.maven.plugin.version>
+<!--  ── These are overridden by Jenkins -D flags ───────────────────
+             Jenkins passes:
+               -Danypoint.environment=dev
+               -Dcloudhub2.applicationName=jenkins-multiple-environs-dev
+               -Danypoint.platform.client_id=xxx
+               -Danypoint.platform.client_secret=xxx
+             If Jenkins does NOT pass them, these defaults are used instead
+        ────────────────────────────────────────────────────────────────  -->
+<anypoint.environment>Sandbox</anypoint.environment>
+<cloudhub2.applicationName>jenkins-multiple-environs</cloudhub2.applicationName>
+<cloudhub2.target>Cloudhub-US-East-2</cloudhub2.target>
+<cloudhub2.replicas>1</cloudhub2.replicas>
+<cloudhub2.vCores>0.1</cloudhub2.vCores>
+<anypoint.platform.client_id>c09ce27b91784380bf8646a62ec65c9d</anypoint.platform.client_id>
+<anypoint.platform.client_secret>8b7B8D66306E47a29f4e3007547774f4</anypoint.platform.client_secret>
+</properties>
+<build>
+<plugins>
+<plugin>
+<groupId>org.mule.tools.maven</groupId>
+<artifactId>mule-maven-plugin</artifactId>
+<version>${mule.maven.plugin.version}</version>
+<extensions>true</extensions>
+<configuration>
+<cloudhub2Deployment>
+<uri>https://anypoint.mulesoft.com</uri>
+<provider>MC</provider>
+<!--  ✅ Reads from -Danypoint.environment passed by Jenkins  -->
+<environment>${anypoint.environment}</environment>
+<!--  ✅ Reads from -Dcloudhub2.target passed by Jenkins  -->
+<target>${cloudhub2.target}</target>
+<!--  ✅ Reads from -Dcloudhub2.applicationName passed by Jenkins  -->
+<applicationName>${cloudhub2.applicationName}</applicationName>
+<!--  ✅ Reads from -Dcloudhub2.replicas passed by Jenkins  -->
+<replicas>${cloudhub2.replicas}</replicas>
+<!--  ✅ Reads from -Dcloudhub2.vCores passed by Jenkins  -->
+<vCores>${cloudhub2.vCores}</vCores>
+<businessGroupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</businessGroupId>
+<!--  ✅ Reads from -Danypoint.platform.client_id passed by Jenkins  -->
+<connectedAppClientId>${anypoint.platform.client_id}</connectedAppClientId>
+<!--  ✅ Reads from -Danypoint.platform.client_secret passed by Jenkins  -->
+<connectedAppClientSecret>${anypoint.platform.client_secret}</connectedAppClientSecret>
+<connectedAppGrantType>client_credentials</connectedAppGrantType>
+</cloudhub2Deployment>
+</configuration>
+</plugin>
+</plugins>
+</build>
+<distributionManagement>
+<repository>
+<id>anypoint-exchange-v3</id>
+<name>Exchange</name>
+<url>https://maven.anypoint.mulesoft.com/api/v3/organizations/6c5ad96b-67a8-4bc6-8bb1-12443d5764e1/maven</url>
+</repository>
 </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>anypoint-exchange-v3</id>
-            <url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
-        </repository>
-        <repository>
-            <id>mulesoft-releases</id>
-            <url>https://repository.mulesoft.org/releases/</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>mulesoft-releases</id>
-            <url>https://repository.mulesoft.org/nexus/repository/releases/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <!-- ✅ Dependencies must be inside <dependencies> -->
-    <dependencies>
-        <dependency>
-            <groupId>org.mule.connectors</groupId>
-            <artifactId>mule-http-connector</artifactId>
-            <version>1.11.1</version>
-            <classifier>mule-plugin</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.mule.connectors</groupId>
-            <artifactId>mule-sockets-connector</artifactId>
-            <version>1.2.7</version>
-            <classifier>mule-plugin</classifier>
-        </dependency>
-    </dependencies>
+<repositories>
+<repository>
+<id>anypoint-exchange-v3</id>
+<url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+</repository>
+<repository>
+<id>mulesoft-releases</id>
+<url>https://repository.mulesoft.org/releases/</url>
+</repository>
+</repositories>
+<pluginRepositories>
+<pluginRepository>
+<id>mulesoft-releases</id>
+<url>https://repository.mulesoft.org/nexus/repository/releases/</url>
+</pluginRepository>
+</pluginRepositories>
+<dependencies>
+<dependency>
+<groupId>org.mule.connectors</groupId>
+<artifactId>mule-http-connector</artifactId>
+<version>1.11.1</version>
+<classifier>mule-plugin</classifier>
+</dependency>
+<dependency>
+<groupId>org.mule.connectors</groupId>
+<artifactId>mule-sockets-connector</artifactId>
+<version>1.2.7</version>
+<classifier>mule-plugin</classifier>
+</dependency>
+</dependencies>
 </project>

@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
-    <artifactId>jenkins-multiple-environs</artifactId>
+    <artifactId>jenkins-multiple-environs-v3</artifactId>
     <version>1.0.4</version>
     <packaging>mule-application</packaging>
-    <name>jenkins-multiple-environs</name>
+    <name>jenkins-multiple-environs-v3</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

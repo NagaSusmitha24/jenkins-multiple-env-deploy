@@ -116,19 +116,19 @@ pipeline {
                     def envConfig = [
                         "Sandbox": [
                             envId   : env.SANDBOX_ENV_ID,
-                            appName : "world-project-api-sandbox"
+                            appName : "world-project-api-jen-sandbox"
                         ],
                         "dev": [
                             envId   : env.DEV_ENV_ID,
-                            appName : "world-project-api-dev"
+                            appName : "world-project-api-jen-dev"
                         ],
                         "uat": [
                             envId   : env.UAT_ENV_ID,
-                            appName : "world-project-api-uat"
+                            appName : "world-project-api-jen-uat"
                         ],
                         "prod": [
                             envId   : env.PROD_ENV_ID,
-                            appName : "world-project-api-prod"
+                            appName : "world-project-api-jen-prod"
                         ]
                     ]
 

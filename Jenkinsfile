@@ -25,7 +25,7 @@ pipeline {
         SANDBOX_ENV_ID       = '39886fb6-d89f-4a56-a400-15ce44a87bbc'
         DEV_ENV_ID           = '2ce5a5ae-ce2a-41a0-96fc-68a5e22df760'
         UAT_ENV_ID           = '864fd6b3-5b44-41c5-89e9-d76573a27639'
-        PROD_ENV_ID          = 'ac61ddf1-1c0f-4c0f-9dfe-f305f90dbb8a'
+        PROD_ENV_ID          = '265c8121-087b-46b5-90ed-2206ea15cefb'
     }
 
     parameters {

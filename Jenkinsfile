@@ -116,19 +116,19 @@ pipeline {
                     def envConfig = [
                         "Sandbox": [
                             envId   : env.SANDBOX_ENV_ID,
-                            appName : "api-world-timezone-sandbox"
+                            appName : "api-world-timezone-app-sandbox"
                         ],
                         "dev": [
                             envId   : env.DEV_ENV_ID,
-                            appName : "api-world-timezone-dev"
+                            appName : "api-world-timezone-app-dev"
                         ],
                         "uat": [
                             envId   : env.UAT_ENV_ID,
-                            appName : "api-world-timezone-uat"
+                            appName : "api-world-timezone-app-uat"
                         ],
                         "production": [
                             envId   : env.PROD_ENV_ID,
-                            appName : "api-world-timezone-prod"
+                            appName : "api-world-timezone-app-prod"
                         ]
                     ]
 

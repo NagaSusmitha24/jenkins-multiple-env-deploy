@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>6c5ad96b-67a8-4bc6-8bb1-12443d5764e1</groupId>
-    <artifactId>world-timezone-application</artifactId>
-    <version>1.0.0</version>
+    <artifactId>world-timezone-application-v1</artifactId>
+    <version>1.0.1</version>
     <packaging>mule-application</packaging>
 
     <name>api-world-timezone-app</name>

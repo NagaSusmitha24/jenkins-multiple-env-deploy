@@ -8,24 +8,24 @@ pipeline {
 
     environment {
 
-        ANYPOINT_ORG_ID      = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
-        EXCHANGE_GROUP_ID    = '6c5ad96b-67a8-4bc6-8bb1-12443d5764e1'
+        ANYPOINT_ORG_ID      = credentials('anypoint-org-id')
+        EXCHANGE_GROUP_ID    = credentials('anypoint-org-id')
 
-        CONNECTED_APP_ID     = 'c09ce27b91784380bf8646a62ec65c9d'
-        CONNECTED_APP_SECRET = '8b7B8D66306E47a29f4e3007547774f4'
+        CONNECTED_APP_ID     = credentials('anypoint-client-id')
+        CONNECTED_APP_SECRET = credentials('anypoint-client-secret')
 
-        TARGET               = 'Cloudhub-US-East-2'
-        CH2_REGION           = 'us-east-1'
-        CH2_REPLICAS         = '1'
-        CH2_VCORES           = '0.1'
-        RUNTIME_VERSION      = '4.9.17'
+        TARGET               = credentials('target')
+        CH2_REGION           = credentials('region')
+        CH2_REPLICAS         = credentials('replicas')
+        CH2_VCORES           = credentials('vcore')
+        RUNTIME_VERSION      = credentials('version')
 
         MAVEN_SETTINGS       = 'C:\\Users\\Admin\\.m2\\settings.xml'
 
-        SANDBOX_ENV_ID       = '39886fb6-d89f-4a56-a400-15ce44a87bbc'
-        DEV_ENV_ID           = '2ce5a5ae-ce2a-41a0-96fc-68a5e22df760'
-        UAT_ENV_ID           = '864fd6b3-5b44-41c5-89e9-d76573a27639'
-        PROD_ENV_ID          = 'cbf629c6-7402-445f-9c7a-674129f6bdea'
+        SANDBOX_ENV_ID       = credentials('SANDBOX_ENV_ID')
+        DEV_ENV_ID           = credentials('DEV_ENV_ID')
+        UAT_ENV_ID           = credentials('UAT_ENV_ID')
+        PROD_ENV_ID          = credentials('PROD_ENV_ID')
     }
 
     parameters {
